@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .video-player {
+            position: relative;
+            width: 1000px;
+            height: 500px;
+            margin: 0px auto;
+        }
+
+        video {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+        }
+
+        .menu {
+            position: absolute;
+            width: 100%;
+            height: 50px;
+            background-color: rgba(0, 0, 0, .5);
+            bottom: 0;
+            display: none;
+        }
+        .menu:hover{
+            display: block;
+        }
+        .menu>.play {
+            position: absolute;
+            margin-left: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            color: #fff;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .menu>.time {
+            position: absolute;
+            margin-left: 120px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100px;
+            height: 30px;
+            color: #fff;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .menu>.progress-bar {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            top: -2px;
+            background-color: #ccc;
+        }
+
+        .menu>.progress-bar>.cur-bar {
+            position: absolute;
+            width: 0px;
+            height: 100%;
+            background-color: orange;
+            opacity: 0.7;
+        }
+
+        .menu>.progress-bar>i {
+            position: absolute;
+            left: 0px;
+            top: -2px;
+            width: 10px;
+            height: 10px;
+            background: orange;
+            border-radius: 50%;
+        }
+
+        .menu>.rate {
+            position: absolute;
+            left: 313px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            color: #fff;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .menu>.rate-list {
+            position: absolute;
+            left: 300px;
+            top: 50%;
+            transform: translateY(-115%);
+            width: 80px;
+            height: 120px;
+            color: #fff;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, .1);
+            display: none;
+        }
+
+        .menu>.rate-list>ul>li:hover {
+            color: green;
+        }
+
+        .volume-increase,
+        .volume-decrease {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100px;
+            height: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            color: #fff;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .volume-increase {
+            left: 450px;
+        }
+
+        .volume-decrease {
+            left: 580px;
+        }
+
+        .fullScreen {
+            position: absolute;
+            right: 180px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            color: #fff;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="video-player">
+        <video src="./index.mp4"></video>
+        <div class="menu">
+            <div class="play">播放</div>
+            <div class="time"></div>
+            <div class="progress-bar">
+                <div class="cur-bar"></div>
+                <i class="cur-point"></i>
+            </div>
+            <div class="rate">倍速</div>
+            <div class="rate-list">
+                <ul>
+                    <li>正常</li>
+                    <li>x 1.25</li>
+                    <li>x 1.5</li>
+                    <li>x 2.0</li>
+                </ul>
+            </div>
+            <div class="volume-increase">volume + +</div>
+            <div class="volume-decrease">volume - -</div>
+            <div class="fullScreen">全屏</div>
+        </div>
+    </div>
+    <script>
+        // 容器
+        var videoPlayer = document.getElementsByClassName('video-player')[0];
+        // 标签
+        var video = document.getElementsByTagName('video')[0];
+        // 菜单
+        var menu = document.getElementsByClassName('menu')[0];
+        var play = document.getElementsByClassName('play')[0];
+        // 时间进度与总时间
+        var time = document.getElementsByClassName('time')[0];
+        // 进度条
+        var progressBar = document.getElementsByClassName('progress-bar')[0];
+        var curBar = document.getElementsByClassName('cur-bar')[0];
+        var curPoint = document.getElementsByClassName('cur-point')[0];
+        var rate = document.getElementsByClassName('rate')[0];
+        var rateList = document.getElementsByClassName('rate-list')[0];
+        var volumeIncrease = document.getElementsByClassName('volume-increase')[0];
+        var volumeDecrease = document.getElementsByClassName('volume-decrease')[0];
+        var fullScreen = document.getElementsByClassName('fullScreen')[0];
+
+        videoPlayer.onmouseenter = function () {
+            menu.style.display = 'block';
+
+        }
+        // 菜单栏的隐藏和出现
+        videoPlayer.onmouseleave = function () {
+            menu.style.display = 'none';
+        }
+        // 播放暂停
+        play.onclick = function () {
+            if (video.paused) {
+                video.play();
+                play.innerHTML = "暂停";
+            } else {
+                video.pause();
+                play.innerHTML = "播放";
+            }
+            
+        }
+        video.onclick = function () {
+            if (video.paused) {
+                video.play();
+                play.innerHTML = "暂停";
+            } else {
+                video.pause();
+                play.innerHTML = "播放";
+            }
+        }
+
+        // 进度条
+
+        progressBar.onclick = function (e) {
+            // console.log(e);
+            // width为进度条的宽度
+            var width = e.layerX;
+            video.currentTime = width / progressBar.clientWidth * video.duration;
+            curBar.style.width = width + 'px';
+            curPoint.style.left = width + 'px';
+        }
+        setInterval(function () {
+            // 总时间
+            var total = video.duration;
+            // 进度
+            var curTime = video.currentTime;
+            var width = curTime / total * progressBar.clientWidth;
+            curBar.style.width = width + 'px';
+            curPoint.style.left = width + 'px';
+            time.innerHTML = parseInt(curTime / 60) + ':' + parseInt(curTime % 60) + '/' + parseInt(total /
+                60) + ':' + parseInt(total % 60);
+        }, 1000 / 60)
+
+        // 倍速
+        rate.onclick = function () {
+            rateList.style.display = 'block';
+        }
+        rateList.onmouseleave = function () {
+            rateList.style.display = 'none';
+        }
+        var liList = rateList.getElementsByTagName('li');
+        for (var i = 0; i < liList.length; i++) {
+            liList[i].index = i;
+            // 将每一个i都存储在每一个li上
+            liList[i].onclick = function () {
+                if (this.index == 0) {
+                    video.playbackRate = "1";
+                    rate.innerHTML = "倍速";
+                } else if (this.index == 1) {
+                    video.playbackRate = "1.25";
+                    rate.innerHTML = "x 1.25";
+                } else if (this.index == 2) {
+                    video.playbackRate = "1.5";
+                    rate.innerHTML = "x 1.5";
+                } else {
+                    video.playbackRate = "2";
+                    rate.innerHTML = "x 2.0";
+                }
+                return false;
+            }
+        }
+
+        // 音量volume加减
+
+        volumeIncrease.onclick = function () {
+            video.volume = video.volume + 0.1 >= 1 ? 1 : video.volume + 0.1;
+            return false;
+        }
+        volumeDecrease.onclick = function () {
+            video.volume = video.volume - 0.1 <= 0 ? 0 : video.volume - 0.1;
+            return false;
+        }
+
+        // 全屏
+
+        fullScreen.onclick = function () {
+            var dom = document.documentElement;
+            var width, height;
+            if (fullScreen.innerHTML == '全屏') {
+                // 浏览器全屏
+                dom.requestFullscreen();
+                width = window.screen.width;
+                height = window.screen.height;
+                fullScreen.innerHTML = '退出全屏';
+                // 三秒后菜单栏消失
+                setInterval(function () {
+                    menu.style.display = 'none';
+                }, 3000);
+                video.onmousemove = function () {
+                    menu.style.display = 'block';
+                }
+            } else {
+                width = 1000;
+                height = 500;
+                fullScreen.innerHTML = '全屏';
+            }
+
+            videoPlayer.style.width = width + 'px';
+            videoPlayer.style.height = height + 'px';
+            video.style.width = width + 'px';
+            video.style.height = height + 'px';
+
+            return false;
+        }
+    </script>
+</body>
+
+</html>
